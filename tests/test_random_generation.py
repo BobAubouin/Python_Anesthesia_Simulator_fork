@@ -1,22 +1,22 @@
 import numpy as np
-from python_anesthesia_simulator import simulator
+from python_anesthesia_simulator import patient
 
 # %% Initialization patient
 ts = 5
 age, height, weight, gender = 74, 164, 88, 1
 np.random.seed(42)
-george_nominal = simulator.Patient(
+george_nominal = patient.Patient(
     [age, height, weight, gender],
     ts=ts,
 )
-george_random = simulator.Patient(
+george_random = patient.Patient(
     [age, height, weight, gender],
     ts=ts,
     random_PK=True,
     random_PD=True,
 )
 
-george_truncated = simulator.Patient(
+george_truncated = patient.Patient(
     [age, height, weight, gender],
     ts=ts,
     random_PK=True,

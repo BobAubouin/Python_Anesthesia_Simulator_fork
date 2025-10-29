@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from python_anesthesia_simulator import simulator, disturbances, metrics
+from python_anesthesia_simulator import patient, disturbances, metrics
 
 ts = 60
 age = 35
@@ -10,14 +10,14 @@ gender = 0
 
 # %%
 
-George_1 = simulator.Patient([age, height, weight, gender], ts=ts,
-                             model_propo="Schnider", model_remi="Minto", random_PD=False)
-George_2 = simulator.Patient([age, height, weight, gender], ts=ts,
-                             model_propo="Schnider", model_remi="Minto", random_PD=False)
-George_3 = simulator.Patient([age, height, weight, gender], ts=ts,
-                             model_propo="Schnider", model_remi="Minto", random_PD=False)
-George_4 = simulator.Patient([age, height, weight, gender], ts=ts,
-                             model_propo="Schnider", model_remi="Minto", random_PD=False, model_stimuli='VitalDB')
+George_1 = patient.Patient([age, height, weight, gender], ts=ts,
+                           model_propo="Schnider", model_remi="Minto", random_PD=False)
+George_2 = patient.Patient([age, height, weight, gender], ts=ts,
+                           model_propo="Schnider", model_remi="Minto", random_PD=False)
+George_3 = patient.Patient([age, height, weight, gender], ts=ts,
+                           model_propo="Schnider", model_remi="Minto", random_PD=False)
+George_4 = patient.Patient([age, height, weight, gender], ts=ts,
+                           model_propo="Schnider", model_remi="Minto", random_PD=False, model_stimuli='VitalDB')
 
 # %% Simulation
 

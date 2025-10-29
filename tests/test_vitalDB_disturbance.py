@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from python_anesthesia_simulator import simulator, TCIController
+from python_anesthesia_simulator import patient, TCIController
 
 # %% Simulation setup
 # Simulation duration in seconds
@@ -16,7 +16,7 @@ ts = 1
 
 Nsim = int(Tsim / ts)
 
-George = simulator.Patient(
+George = patient.Patient(
     [age, height, weight, gender],
     ts=ts,
     model_propo="Eleveld",

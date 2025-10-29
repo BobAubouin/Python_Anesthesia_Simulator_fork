@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from python_anesthesia_simulator import simulator, disturbances
+from python_anesthesia_simulator import patient, disturbances
 
 # %% Simulation setup
 # Simulation duration in seconds
@@ -27,19 +27,19 @@ start_step = 500
 end_step = 700
 
 # constant sqi
-sqi = 50 
+sqi = 50
 
 # Step sqi from 100 to 50
 sqi_profile_1 = np.zeros((Nsim,))
-sqi_profile_1[0:int(start_step/ts)] = 100   
-sqi_profile_1[int(start_step/ts):] = sqi    
+sqi_profile_1[0:int(start_step/ts)] = 100
+sqi_profile_1[int(start_step/ts):] = sqi
 
 # Double step sqi from 100 to 0 and back
 # To check if the current value of the bis is resumed when sqi comes back to 100
-sqi_profile_2 = np.zeros((Nsim,))  
+sqi_profile_2 = np.zeros((Nsim,))
 sqi_profile_2[0:int(start_step/ts)] = 100
-sqi_profile_2[int(start_step/ts):int(end_step/ts)] = 0 
-sqi_profile_2[int(end_step/ts):] = 100  
+sqi_profile_2[int(start_step/ts):int(end_step/ts)] = 0
+sqi_profile_2[int(end_step/ts):] = 100
 
 # Propofol infusion profile
 propofol_infusion_profile[0:int(50/ts)] = 2          # 2 mg/s for 50 seconds
@@ -49,19 +49,19 @@ propofol_infusion_profile[int(150/ts):] = 0.2        # 0.2 mg/s from 150s onward
 bis_delay_1 = 120 * (1 - sqi/100)
 
 # %% Simulation 1: Induction phase
-# Create the patient object 
-George_1 = simulator.Patient([age, height, weight, gender], ts=ts, random_PD=False)
+# Create the patient object
+George_1 = patient.Patient([age, height, weight, gender], ts=ts, random_PD=False)
 
 # One step simulation
 for k in range(Nsim-1):
-    uProp_k = propofol_infusion_profile[k]    
+    uProp_k = propofol_infusion_profile[k]
     George_1.one_step(u_propo=uProp_k, sqi=sqi, noise=False)
-    
-# %% Simulation 2: Maintenance phase    
+
+# %% Simulation 2: Maintenance phase
 # Create the patient objects
-George_2 = simulator.Patient([age, height, weight, gender], ts=ts, random_PD=False)    
-George_3 = simulator.Patient([age, height, weight, gender], ts=ts, random_PD=False)
-George_4 = simulator.Patient([age, height, weight, gender], ts=ts, random_PD=False)
+George_2 = patient.Patient([age, height, weight, gender], ts=ts, random_PD=False)
+George_3 = patient.Patient([age, height, weight, gender], ts=ts, random_PD=False)
+George_4 = patient.Patient([age, height, weight, gender], ts=ts, random_PD=False)
 # Set the targets for equilibrium point
 bis_target_1 = 50
 tol_target_1 = 0.9
@@ -101,7 +101,7 @@ time_george_4 = first_crossing_4['Time']
 
 # %% plot
 if __name__ == '__main__':
-    
+
     fig, ax = plt.subplots(2)
     ax[0].plot(George_1.dataframe['Time'], George_1.dataframe['BIS'])
     ax[1].plot(George_1.dataframe['Time'], George_1.dataframe['u_propo'])
@@ -112,7 +112,7 @@ if __name__ == '__main__':
         ax[i].grid()
     plt.ticklabel_format(style='plain')
     plt.show()
-    
+
     fig, ax = plt.subplots(2)
     ax[0].plot(George_2.dataframe['Time'], George_2.dataframe['BIS'])
     ax[0].plot(George_3.dataframe['Time'], George_3.dataframe['BIS'])
@@ -123,8 +123,8 @@ if __name__ == '__main__':
     for i in range(2):
         ax[i].grid()
     plt.ticklabel_format(style='plain')
-    plt.show()    
-    
+    plt.show()
+
     fig, ax = plt.subplots(2)
     ax[0].plot(George_2.dataframe['Time'], George_2.dataframe['BIS'])
     ax[0].plot(George_4.dataframe['Time'], George_4.dataframe['BIS'])
@@ -137,6 +137,8 @@ if __name__ == '__main__':
     plt.show()
 
 # %%
+
+
 def test_delay():
     """Check that the BIS delays obtained in the simulations match those expected"""
     # Check the delay during the induction phase

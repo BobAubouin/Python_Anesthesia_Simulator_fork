@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from python_anesthesia_simulator import simulator
+from python_anesthesia_simulator import patient
 
 # %% Simulation setup
 
@@ -31,81 +31,81 @@ propofol_infusion_profile[int(150/ts):] = 0.2        # 0.2 mg/s from 150s onward
 # %% Young patient simulation
 age = 20
 bis_delay_1 = 15 + np.exp(0.0517*age)
-George_1 = simulator.Patient([age, height, weight, gender],
-                             ts=ts,
-                             model_propo="Eleveld",
-                             model_bis="Eleveld",
-                             random_PD=False)
-George_11 = simulator.Patient([age, height, weight, gender],
-                             ts=ts,
-                             model_propo="Eleveld",
-                             model_bis="Eleveld",
-                             random_PD=False)
-George_111 = simulator.Patient([age, height, weight, gender],
+George_1 = patient.Patient([age, height, weight, gender],
+                           ts=ts,
+                           model_propo="Eleveld",
+                           model_bis="Eleveld",
+                           random_PD=False)
+George_11 = patient.Patient([age, height, weight, gender],
+                            ts=ts,
+                            model_propo="Eleveld",
+                            model_bis="Eleveld",
+                            random_PD=False)
+George_111 = patient.Patient([age, height, weight, gender],
                              ts=ts,
                              model_propo="Eleveld",
                              model_bis="Eleveld",
                              random_PD=False)
 # Full simulation
-df_George_1 = George_1.full_sim(u_propo = propofol_infusion_profile)
+df_George_1 = George_1.full_sim(u_propo=propofol_infusion_profile)
 # One step simulation
 for k in range(Nsim-1):
-    uProp_k = propofol_infusion_profile[k]    
+    uProp_k = propofol_infusion_profile[k]
     George_11.one_step(u_propo=uProp_k, noise=False)
-    George_111.one_step(u_propo=uProp_k, noise=False, sqi = sqi)
+    George_111.one_step(u_propo=uProp_k, noise=False, sqi=sqi)
 
 # %% Medium age patient simulation
 age = 60
 bis_delay_2 = 15 + np.exp(0.0517*age)
-George_2 = simulator.Patient([age, height, weight, gender],
-                             ts=ts,
-                             model_propo="Eleveld",
-                             model_bis="Eleveld",
-                             random_PD=False)
-George_22 = simulator.Patient([age, height, weight, gender],
-                             ts=ts,
-                             model_propo="Eleveld",
-                             model_bis="Eleveld",
-                             random_PD=False)
-George_222 = simulator.Patient([age, height, weight, gender],
+George_2 = patient.Patient([age, height, weight, gender],
+                           ts=ts,
+                           model_propo="Eleveld",
+                           model_bis="Eleveld",
+                           random_PD=False)
+George_22 = patient.Patient([age, height, weight, gender],
+                            ts=ts,
+                            model_propo="Eleveld",
+                            model_bis="Eleveld",
+                            random_PD=False)
+George_222 = patient.Patient([age, height, weight, gender],
                              ts=ts,
                              model_propo="Eleveld",
                              model_bis="Eleveld",
                              random_PD=False)
 # Full simulation
-df_George_2 = George_2.full_sim(u_propo = propofol_infusion_profile)
+df_George_2 = George_2.full_sim(u_propo=propofol_infusion_profile)
 # One step simulation
 for k in range(Nsim-1):
-    uProp_k = propofol_infusion_profile[k]    
+    uProp_k = propofol_infusion_profile[k]
     George_22.one_step(u_propo=uProp_k, noise=False)
-    George_222.one_step(u_propo=uProp_k, noise=False, sqi = sqi)
+    George_222.one_step(u_propo=uProp_k, noise=False, sqi=sqi)
 
 # %% Elderly patient simulation
 age = 80
 bis_delay_3 = 15 + np.exp(0.0517*age)
-George_3 = simulator.Patient([age, height, weight, gender],
-                             ts=ts,
-                             model_propo="Eleveld",
-                             model_bis="Eleveld",
-                             random_PD=False)
-George_33 = simulator.Patient([age, height, weight, gender],
-                             ts=ts,
-                             model_propo="Eleveld",
-                             model_bis="Eleveld",
-                             random_PD=False)
-George_333 = simulator.Patient([age, height, weight, gender],
+George_3 = patient.Patient([age, height, weight, gender],
+                           ts=ts,
+                           model_propo="Eleveld",
+                           model_bis="Eleveld",
+                           random_PD=False)
+George_33 = patient.Patient([age, height, weight, gender],
+                            ts=ts,
+                            model_propo="Eleveld",
+                            model_bis="Eleveld",
+                            random_PD=False)
+George_333 = patient.Patient([age, height, weight, gender],
                              ts=ts,
                              model_propo="Eleveld",
                              model_bis="Eleveld",
                              random_PD=False)
 
 # Full simulation
-df_George_3 = George_3.full_sim(u_propo = propofol_infusion_profile)
+df_George_3 = George_3.full_sim(u_propo=propofol_infusion_profile)
 # One step simulation
 for k in range(Nsim-1):
-    uProp_k = propofol_infusion_profile[k]    
+    uProp_k = propofol_infusion_profile[k]
     George_33.one_step(u_propo=uProp_k, noise=False)
-    George_333.one_step(u_propo=uProp_k, noise=False, sqi = sqi)
+    George_333.one_step(u_propo=uProp_k, noise=False, sqi=sqi)
 
 
 # %% Compute the delays obtained in simulation
@@ -166,8 +166,7 @@ if __name__ == '__main__':
         ax[i].grid()
     plt.ticklabel_format(style='plain')
     plt.show()
-    
-    
+
     fig, ax = plt.subplots(2)
 
     ax[0].plot(df_George_1['Time'], df_George_1['BIS'])
@@ -188,6 +187,8 @@ if __name__ == '__main__':
     plt.show()
 
 # %%
+
+
 def test_delay():
     """Check that the BIS delays obtained in the simulations match those of the Eleveld model"""
 

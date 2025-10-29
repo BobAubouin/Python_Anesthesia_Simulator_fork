@@ -1,6 +1,6 @@
 from python_anesthesia_simulator.pk_models import AtracuriumModel
 from python_anesthesia_simulator.pd_models import NMB_model
-from python_anesthesia_simulator.simulator import Patient
+from python_anesthesia_simulator.patient import Patient
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -28,7 +28,7 @@ x0 = np.array([500/V1_test_model_default, 0, 0, 0])
 # that the two initialization methodologies give the same results
 pk_parameters_custom = {
     'V1': 49.0,          # Volume of the central compartment [ml/kg]
-    'V2': 157.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 157.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 5.5,           # Clearance [ml/min/kg]
     't12_alpha': 2.06,   # First half-life time [min]
     't12_beta': 19.9,    # Second half-life time [min]
@@ -37,19 +37,19 @@ pk_parameters_custom = {
 }
 pd_parameters_custom = {
     'C50': 0.625,          # Half effect concentration [ug/ml]
-    'gamma': 4.25          # Slope 
+    'gamma': 4.25          # Slope
 }
 
 # Create Atracurium PK model objects
 test_model_default = AtracuriumModel([age, height, weight_test_model_default, gender])
 test_model_custom = AtracuriumModel([age, height, weight_test_model_default, gender],
-                                    model_params= pk_parameters_custom)
+                                    model_params=pk_parameters_custom)
 test_model_default_one_step = AtracuriumModel([age, height, weight_test_model_default, gender])
 test_model_custom_one_step = AtracuriumModel([age, height, weight_test_model_default, gender],
-                                    model_params= pk_parameters_custom)
+                                             model_params=pk_parameters_custom)
 # Create Atracurium PD model objects
 test_hill_default = NMB_model()
-test_hill_custom = NMB_model(hill_param= pd_parameters_custom)
+test_hill_custom = NMB_model(hill_param=pd_parameters_custom)
 # test_hill_custom.plot_surface()
 
 # Create Patient objects that implements the atracurium models
@@ -65,7 +65,7 @@ time = np.arange(Tsim)  # Time axis
 
 # Simulation by using full_sim
 # Simulate the free response to a bolus administration with default initialization
-x_default = test_model_default.full_sim(u= atracurium_infusion_profile, x0= x0)
+x_default = test_model_default.full_sim(u=atracurium_infusion_profile, x0=x0)
 nmb_default = test_hill_default.compute_nmb(x_default[3])
 # Find response peak and its timing
 peak_idx_default = np.argmin(nmb_default)
@@ -76,7 +76,7 @@ recovery_idx_default = np.where(nmb_default <= 50)[0][-1]
 recovery_time_default = time[recovery_idx_default]
 
 # Simulate the free response to a bolus administration with custom initialization
-x_custom = test_model_custom.full_sim(u= atracurium_infusion_profile, x0= x0)
+x_custom = test_model_custom.full_sim(u=atracurium_infusion_profile, x0=x0)
 nmb_custom = test_hill_custom.compute_nmb(x_custom[3])
 # Find response peak and its timing
 peak_idx_custom = np.argmin(nmb_custom)
@@ -88,7 +88,7 @@ recovery_time_custom = time[recovery_idx_custom]
 
 # Simulate the free response to a bolus administration with the Patient object
 df_george_1 = George_1.full_sim(u_atra=atracurium_infusion_profile,
-                  x0_atra=x0)
+                                x0_atra=x0)
 nmb_george_1 = df_george_1.NMB
 # Find response peak and its timing
 peak_idx_george_1 = np.argmin(nmb_george_1)
@@ -113,7 +113,7 @@ peak_time_default_one_step = time[peak_idx_default_one_step]
 # Find  recovery time NMB>= 50
 recovery_idx_default_one_step = np.where(nmb_default_one_step <= 50)[0][-2]
 recovery_time_default_one_step = time[recovery_idx_default_one_step]
-    
+
 Ce_custom_one_step = np.zeros((Nsim,))
 nmb_custom_one_step = np.zeros((Nsim,))
 test_model_custom_one_step.initialize_state(x0)
@@ -121,7 +121,7 @@ test_model_custom_one_step.initialize_state(x0)
 for k in range(Nsim-1):
     uAtra_k = atracurium_infusion_profile[k]
     Ce_custom_one_step[k] = test_model_custom_one_step.one_step(uAtra_k)
-    nmb_custom_one_step[k] = test_hill_custom.compute_nmb(Ce_custom_one_step[k])   
+    nmb_custom_one_step[k] = test_hill_custom.compute_nmb(Ce_custom_one_step[k])
 # Find response peak and its timing
 peak_idx_custom_one_step = np.argmin(nmb_custom_one_step)
 min_nmb_custom_one_step = nmb_custom_one_step[peak_idx_custom_one_step]
@@ -130,11 +130,11 @@ peak_time_custom_one_step = time[peak_idx_custom_one_step]
 recovery_idx_custom_one_step = np.where(nmb_custom_one_step <= 50)[0][-2]
 recovery_time_custom_one_step = time[recovery_idx_custom_one_step]
 
-George_one_step.initialized_at_given_state(x0_atra= x0)
-for k in range(Nsim-1):    
+George_one_step.initialized_at_given_state(x0_atra=x0)
+for k in range(Nsim-1):
     uAtra_k = atracurium_infusion_profile[k]
     George_one_step.one_step(u_atra=uAtra_k,
-                      noise=False)    
+                             noise=False)
 nmb_george_one_step = George_one_step.dataframe['NMB']
 # Find response peak and its timing
 peak_idx_george_one_step = np.argmin(nmb_george_one_step)
@@ -159,7 +159,7 @@ V1_test_2 = 49
 # that the two initialization methodologies give the same results
 pk_parameters_custom_test_2 = {
     'V1': 49.0,          # Volume of the central compartment [ml/kg]
-    'V2': 157.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 157.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 5.5,           # Clearance [ml/min/kg]
     't12_alpha': 2.06,   # First half-life time [min]
     't12_beta': 19.9,    # Second half-life time [min]
@@ -168,16 +168,16 @@ pk_parameters_custom_test_2 = {
 }
 pd_parameters_custom_test_2 = {
     'C50': 0.625,          # Half effect concentration [ug/ml]
-    'gamma': 4.25          # Slope 
+    'gamma': 4.25          # Slope
 }
 
 # Create Atracurium PK model objects
 test_model_default_test_2 = AtracuriumModel([age_test_2, height_test_2, weight_test_2, gender_test_2])
 test_model_custom_test_2 = AtracuriumModel([age_test_2, height_test_2, weight_test_2, gender_test_2],
-                                    model_params= pk_parameters_custom_test_2)
+                                           model_params=pk_parameters_custom_test_2)
 # Create Atracurium PD model objects
 test_hill_default_test_2 = NMB_model()
-test_hill_custom_test_2 = NMB_model(hill_param= pd_parameters_custom_test_2)
+test_hill_custom_test_2 = NMB_model(hill_param=pd_parameters_custom_test_2)
 # test_hill_custom.plot_surface()
 
 # Create Patient objects that implements the atracurium models
@@ -199,14 +199,14 @@ atracurium_infusion_profile_test_2[0:int(50/ts_test_2)] = 20  # 20 ug/s for 50 s
 atracurium_infusion_profile_test_2[int(150/ts_test_2):] = 8   # 8 ug/s from 150s onward
 
 # Simulate the forced response to infusion with default initialization
-x_default_test_2 = test_model_default_test_2.full_sim(u= atracurium_infusion_profile_test_2)
+x_default_test_2 = test_model_default_test_2.full_sim(u=atracurium_infusion_profile_test_2)
 nmb_default_test_2 = test_hill_default_test_2.compute_nmb(x_default_test_2[3])
 # Find  induction time NMB<= 20
 induction_idx_default_test_2 = np.where(nmb_default_test_2 <= 20)[0][0]
 induction_time_default_test_2 = time[induction_idx_default_test_2]
 
 # Simulate the forced response to infusion with custom initialization
-x_custom_test_2 = test_model_custom_test_2.full_sim(u= atracurium_infusion_profile_test_2)
+x_custom_test_2 = test_model_custom_test_2.full_sim(u=atracurium_infusion_profile_test_2)
 nmb_custom_test_2 = test_hill_custom_test_2.compute_nmb(x_custom_test_2[3])
 # Find  induction time NMB<= 20
 induction_idx_custom_test_2 = np.where(nmb_custom_test_2 <= 20)[0][0]
@@ -230,49 +230,50 @@ def test_default_initialization_atracurium():
     assert test_hill_default.compute_nmb(0.8) <= 30
     assert test_hill_default.compute_nmb(1) <= 20
     assert test_hill_default.compute_nmb(2) <= 10
-    
+
     assert test_hill_custom.compute_nmb(0) == 100
     assert test_hill_custom.compute_nmb(0.4) >= 80
     assert test_hill_custom.compute_nmb(0.6) >= 50
     assert test_hill_custom.compute_nmb(0.8) <= 30
     assert test_hill_custom.compute_nmb(1) <= 20
     assert test_hill_custom.compute_nmb(2) <= 10
-    
+
     # Bolus response
     # Check the key characteristic of the average patient response
     assert min_nmb_default < 1
     assert peak_time_default > 500
     assert 3000 <= recovery_time_default <= 4000
-    
+
     assert min_nmb_custom < 1
     assert peak_time_custom > 500
     assert 3000 <= recovery_time_custom <= 4000
-    
+
     assert min_nmb_george_1 < 1
     assert peak_time_george_1 > 500
     assert 3000 <= recovery_time_george_1 <= 4000
-    
+
     assert min_nmb_default_one_step < 1
     assert peak_time_default_one_step > 500
     assert 3000 <= recovery_time_default_one_step <= 4000
-    
+
     assert min_nmb_custom_one_step < 1
     assert peak_time_custom_one_step > 500
     assert 3000 <= recovery_time_custom_one_step <= 4000
-    
+
     assert min_nmb_george_one_step < 1
     assert peak_time_george_one_step > 500
     assert 3000 <= recovery_time_george_one_step <= 4000
-    
+
     # Infusion response
     # Check the key characteristic of the average patient response
     assert 2000 <= induction_time_default_test_2 <= 4000
     assert 2000 <= induction_time_custom_test_2 <= 4000
     assert 2000 <= induction_time_george_2 <= 4000
 
+
 # %% Plots
 if __name__ == '__main__':
-    
+
     # Plot bolus responses
     plt.figure(figsize=(10, 6))
     for i in range(4):
@@ -291,10 +292,10 @@ if __name__ == '__main__':
     plt.legend()
     plt.grid(True)
     plt.show()
-     
+
     plt.figure(figsize=(10, 6))
-    #plt.plot(time, nmb_default, 'k-', linewidth=1, label='NMB')
-    #plt.plot(df_george_1.Time, df_george_1.NMB, 'g--', linewidth=1)
+    # plt.plot(time, nmb_default, 'k-', linewidth=1, label='NMB')
+    # plt.plot(df_george_1.Time, df_george_1.NMB, 'g--', linewidth=1)
     plt.plot(time, nmb_default, 'k-', label='NMB')
     plt.plot(df_george_1.Time, df_george_1.NMB, 'g--')
     plt.plot(time, nmb_default_one_step, 'm--')
@@ -304,15 +305,14 @@ if __name__ == '__main__':
     # Style
     plt.xlabel('time (s)', fontsize=12)
     plt.ylabel('NMB (%)', fontsize=12)
-    plt.title('Average patient', fontsize=14, pad=20) 
+    plt.title('Average patient', fontsize=14, pad=20)
     # Grid and ticks
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.xticks(np.arange(0, 7000, 1000))  # Major ticks every 1000s
     plt.yticks(np.arange(0, 140, 20))     # Major ticks every 20%
     plt.tight_layout()
     plt.show()
-    
-    
+
     # Plot infusion responses
     # Create figure with two subplots
     plt.figure(figsize=(10, 8))
@@ -325,7 +325,7 @@ if __name__ == '__main__':
     plt.ylim(0, 120)   # Y-axis from 0-120%
     # Style
     plt.ylabel('NMB (%)', fontsize=12)
-    plt.title('Average patient', fontsize=14, pad=20) 
+    plt.title('Average patient', fontsize=14, pad=20)
     # Grid and ticks
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.xticks(np.arange(0, 7000, 1000))  # Major ticks every 1000s
@@ -345,4 +345,3 @@ if __name__ == '__main__':
     plt.yticks(np.arange(0, 30, 5))  # Adjust ticks based on your infusion rate
     plt.tight_layout()
     plt.show()
-    

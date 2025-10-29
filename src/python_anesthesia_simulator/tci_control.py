@@ -15,8 +15,6 @@ class TCIController():
         Patient information = [age (yr), height (cm), weight (kg), gender( 0= female, 1 = male)].
     drug_name : str
         Can be either 'Propofol' or 'Remifentanil'.
-    drug_concentration : float
-        drug concentration in the seringue (mg/ml for Propofol and µg/ml for remifentanil).
     model_used : str
         Could be "Minto", "Eleveld" for Remifentanil,
         "Schnider", "Marsh_initial", "Marsh_modified", "Shuttler" or "Eleveld" for Propofol.
@@ -35,8 +33,6 @@ class TCIController():
         Sampling time of the model for the calculs.
     control_time : float
         Sampling time of the controller.
-    drug_concentration : float
-        drug concentration in the seringue (mg/ml for Propofol and µg/ml for remifentanil).
     target_id : int
         index of the target compartment in the state vector.
     infusion_max : float
@@ -76,14 +72,13 @@ class TCIController():
         """
         self.sampling_time = sampling_time
         self.control_time = control_time
-        self.drug_concentration = drug_concentration
         if target_compartement == 'plasma':
             self.target_id = 0
         elif target_compartement == 'effect_site':
             self.target_id = 3
         else:
             raise ValueError('target_compartement must be either "plasma" or "effect_site"')
-        self.infusion_max = maximum_rate * drug_concentration / 3600  # in mg/s or µg/s respectively Propo and Remi
+        self.infusion_max = maximum_rate  # in mg/s or µg/s respectively Propo and Remi
 
         height = patient_info[1]
         weight = patient_info[2]
@@ -136,7 +131,7 @@ class TCIController():
         Returns
         -------
         infusion rate: float
-            infusion rate in ml/hr.
+            infusion rate in mg/s per Propofol and µg/s for remifentanil.
 
         """
 
@@ -194,4 +189,4 @@ class TCIController():
         self.infusion_rate = max(min(self.infusion_rate, self.infusion_max), 0)
         if isinstance(self.infusion_rate, np.ndarray):
             self.infusion_rate = self.infusion_rate[0]
-        return float(self.infusion_rate / self.drug_concentration * 3600)
+        return self.infusion_rate
