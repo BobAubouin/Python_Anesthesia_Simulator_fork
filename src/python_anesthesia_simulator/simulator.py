@@ -13,14 +13,14 @@ class Simulator:
     """Class to add environment and usefull functions for simulation."""
 
     def __init__(self,
-                 patient: Patient,
+                 patient: Patient = None,
                  tci_propo: Optional[str] = None,
                  tci_remi: Optional[str] = None,
                  #  tci_nore_: Optional[bool] = False,  not yet available
                  #  tci_atracurium: Optional[bool] = False, not yet available
                  disturbance_profil: Optional[str] = None,
                  noise: bool = False,
-                 save_data: bool = False,
+                 save_data: bool = True,
                  ):
         """Initialize the Simulator with a patient, and eventual TCI pumps.
 
@@ -44,11 +44,12 @@ class Simulator:
         self.time = 0
         self.disturbance_profil = disturbance_profil
         self.noise = noise
+        self.save_data = save_data
         self.demographic = [
             patient.age,
             patient.weight,
             patient.height,
-            patient.gender
+            patient.sex
         ]
         if tci_propo != 'none':
             if tci_propo not in ['Plasma', 'Effect_site']:
@@ -77,16 +78,37 @@ class Simulator:
         self.bis_delay_buffer = np.ones(int(np.ceil(self.bis_delay_max / self.ts))) * self.bis
 
         # init noise model
-        self.bis_noise_std = 3
-        self.co_noise_std = 0.1
-        self.map_noise_std = 5
-        xi = 0.2
-        target_peak_fr = 0.03 * 2 * np.pi
-        omega = target_peak_fr / np.sqrt(1 - 2 * xi**2)
-        noise_filter = TransferFunction([0.1, 1], [1 / omega**2, 2 * xi / omega, 1])
-        self.noise_filter_d = noise_filter.to_discrete(self.ts, method='bilinear')
-        white_noise = np.random.normal(0, self.bis_noise_std, 1000)
-        _, self.bis_noise = dlsim(self.noise_filter_d, u=white_noise)
+        self.map_noise_std = 30
+        self.hr_noise_std = 17
+        self.bis_noise_std = 35
+        # MAP
+        xi = 2
+        a = 4 * xi**2 - 2
+        y = (-a + np.sqrt(a**2 + 4)) / 2
+        omega = 0.01/np.sqrt(y)
+        map_filter = TransferFunction([1], [1 / omega**2, 2 * xi / omega, 1])
+        self.map_noise_filter = map_filter.to_discrete(self.ts, method='bilinear')
+        # HR
+        xi = 10
+        a = 4 * xi**2 - 2
+        y = (-a + np.sqrt(a**2 + 4)) / 2
+        omega = 0.02/np.sqrt(y)
+        hr_filter = TransferFunction([1], [1 / omega**2, 2 * xi / omega, 1])
+        self.hr_noise_filter = hr_filter.to_discrete(self.ts, method='bilinear')
+        # bis
+        xi = 1
+        a = 4 * xi**2 - 2
+        y = (-a + np.sqrt(a**2 + 4)) / 2
+        omega = 0.04/np.sqrt(y)
+        bis_filter = TransferFunction([1], [1 / omega**2, 2 * xi / omega, 1])
+        self.bis_noise_filter = bis_filter.to_discrete(self.ts, method='bilinear')
+
+        white_noise_map = np.random.normal(0, self.map_noise_std, 1000)
+        white_noise_hr = np.random.normal(0, self.hr_noise_std, 1000)
+        white_noise_bis = np.random.normal(0, self.bis_noise_std, 1000)
+        _, self.map_noise = dlsim(self.map_noise_filter, u=white_noise_map)
+        _, self.hr_noise = dlsim(self.hr_noise_filter, u=white_noise_hr)
+        _, self.bis_noise = dlsim(self.bis_noise_filter, u=white_noise_bis)
         self.noise_index = 0
 
         # Save data
@@ -103,7 +125,8 @@ class Simulator:
                  ) -> tuple[float, float, float, float]:
         r"""Simulate one step of the patient model with given inputs.
 
-        if tci pumps are used, the inputs are the target concentrations. Otherwise, they are the infusion rates.
+        If tci pumps are used, the inputs are the target concentrations. Otherwise, they are the infusion rates.
+
         Parameters
         ----------
         input_propo : float, optional
@@ -116,6 +139,7 @@ class Simulator:
             Infusion rate (mg/s) for Atracurium. The default is 0.
         sqi: float, optional
             Signal Quality Index of the BIS signal. It affects the BIS delay (expressed in seconds) according to the relationship proposed in [Wahlquist2025]_: :math:`bis\_delay = bis\_delay\_max * (1 - \frac{sqi}{100})`. The default is 100.
+
         Returns
         -------
         tuple[float, float, float, float]
@@ -174,25 +198,33 @@ class Simulator:
 
     def add_noise(self):
         r"""
-        Add noise on the outputs of the model (except TOL and NMB).
+        Add noise on MAP, HR and BIS.
 
-        The MAP and CO noises are considered white noise while the BIS noise is filtered.
-        The filter of the BIS noise is a second order low pass filter with a cut-off frequency of 0.03 Hz.
+        All noise are considered white noise filtered by a second order transfert function:
+
+        - For MAP, the standard deviation of the white noise is 30 and the filter is a second-order low-pass noise filter with damping ratio ξ=2 and cutoff frequency ω=0.01.
+        - For HR, the standard deviation of the white noise is 17 and the filter is a second-order low-pass noise filter with damping ratio ξ=10 and cutoff frequency ω=0.02. In addition, the output is ceiled to the nearest integer.
+        - For BIS, the standard deviation of the white noise is 35 and the filter is a second-order low-pass noise filter with damping ratio ξ=1 and cutoff frequency ω=0.04.
+
+        See identification details on this `Notebook <https://github.com/AnesthesiaSimulation/PAS_vs_vitalDB/blob/main/scripts/identify_noise.ipynb>`_
 
         """
-        # compute filter noise for BIS
-        # white noise
         self.noise_index += 1
         if self.noise_index >= len(self.bis_noise):
-            self.noise_index = 0
             # new list noise
-            white_noise = np.random.normal(0, self.bis_noise_std, 1000)
-            _, self.bis_noise = dlsim(self.noise_filter_d, u=white_noise)
+            white_noise_map = np.random.normal(0, self.map_noise_std, 1000)
+            white_noise_hr = np.random.normal(0, self.hr_noise_std, 1000)
+            white_noise_bis = np.random.normal(0, self.bis_noise_std, 1000)
+            _, self.map_noise = dlsim(self.map_noise_filter, u=white_noise_map)
+            _, self.hr_noise = dlsim(self.hr_noise_filter, u=white_noise_hr)
+            _, self.bis_noise = dlsim(self.bis_noise_filter, u=white_noise_bis)
+            self.noise_index = 0
+
         self.bis += self.bis_noise[self.noise_index]
         self.bis = np.clip(self.bis, 0, 100)
-        # random noise for MAP and CO
-        self.map += np.random.normal(scale=self.map_noise_std)
-        self.co += np.random.normal(scale=self.co_noise_std)
+        self.map += self.map_noise[self.noise_index]
+        self.hr += self.hr_noise[self.noise_index]
+        self.hr = np.ceil(self.hr)
 
     def init_dataframe(self):
         r"""Initilize the dataframe variable with the following columns:
@@ -275,3 +307,59 @@ class Simulator:
             [df for df in (self.dataframe, pd.DataFrame(new_line, index=[1], dtype=float)) if not df.empty],
             ignore_index=True
         )
+
+    def generate_random_patient(self,
+                                distribution: str = 'uniform',
+                                patient_arg: list = [],
+                                ):
+        """
+        Generate a random patient with caracteristique following either a uniform distribution or a distribution fitted on VitalDB data.
+
+        Paramters
+        ----------
+        distribution: str, optionnal
+            Choose how patient characteristic are drawn. Can be "uniform" or "VitalDB". Default is "uniform".
+        patient_arg: list, optionnal
+            Arguments to pass to init the patient class. Default is an empty list.
+        Return
+        -------
+        patient: Patient object
+            Instance of the patient class.
+        """
+        if distribution == 'uniform':
+            age = np.random.randint(low=18, high=81)
+            height = np.random.randint(low=150, high=190)
+            weight = np.random.randint(low=50, high=100)
+            sex = np.random.randint(low=0, high=2)
+        elif distribution == 'VitalDB':
+
+            mean_male = [55.4, 167.6, 65.8]  # age, height, weight
+            mean_female = [51.6, 157.7, 54.4]
+            sigma_male = [
+                [116.2, -13.9, -41.4],
+                [-13.9,  33.3,  18.1],
+                [-41.4,  18.1, 105.0]]
+            sigma_female = [
+                [251.5, -44.0, -19.0],
+                [-44.0,  21.3,  22.5],
+                [-19.0,  22.5,  68.8]]
+            sex = np.random.randint(low=0, high=2)
+            good_range = False
+            while not good_range:
+                if sex == 0:
+                    vec = np.random.multivariate_normal(mean_female, sigma_female)
+                else:
+                    vec = np.random.multivariate_normal(mean_male, sigma_male)
+                good_age = (vec[0] >= 18) and (vec[0] <= 80)
+                good_height = (vec[1] >= 145) and (vec[1] <= 185)
+                good_weight = (vec[2] >= 40) and (vec[2] <= 95)
+                good_range = good_age and good_height and good_weight
+            age = vec[0]
+            height = vec[1]
+            weight = vec[2]
+
+        self.patient = Patient(
+            [age, height, weight, sex],
+            *patient_arg,
+        )
+        return self.patient
