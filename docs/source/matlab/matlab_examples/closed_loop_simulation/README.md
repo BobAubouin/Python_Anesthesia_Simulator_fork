@@ -40,7 +40,7 @@ weight = 60;
 sex = 0;                         
 sampling_time = 0.1;                
 
-George = simulator.Patient([age, height, weight, sex],...
+George = patient.Patient([age, height, weight, sex],...
     ts = sampling_time);
 ```
 

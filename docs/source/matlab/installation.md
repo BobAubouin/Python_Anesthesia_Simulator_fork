@@ -69,7 +69,7 @@ age = 18; height = 170; weight = 60; sex = 0; % 0=female, 1=male
 sampling_time = 1;
 
 % Create a Patient object
-George = simulator.Patient([age, height, weight, sex], ts=sampling_time);
+George = patient.Patient([age, height, weight, sex], ts=sampling_time);
 
 ```
 
@@ -119,7 +119,7 @@ function [bis, co, map, tol, nmb] = callPython(u_p,u_r,u_n,u_a,age,height,weight
     % Initialize Python environment and patient once
     if isempty(simulator)
         simulator = py.importlib.import_module('python_anesthesia_simulator.simulator');
-        George = simulator.Patient([age, height, weight, sex], ts=sampling_time);
+        George = patient.Patient([age, height, weight, sex], ts=sampling_time);
     end
 
     % Run one simulation step

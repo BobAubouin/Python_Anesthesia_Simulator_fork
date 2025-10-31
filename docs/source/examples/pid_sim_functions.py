@@ -20,7 +20,7 @@ from pyswarm import pso
 import python_anesthesia_simulator as pas
 
 # Patient table:
-# index, Age, H[cm], W[kg], Gender, Ce50p, Ce50r, γ, β, E0, Emax
+# index, Age, H[cm], W[kg], sex, Ce50p, Ce50r, γ, β, E0, Emax
 Patient_table = [[1,  40, 163, 54, 0, 4.73, 24.97,  2.97,  0.3, 97.86, 89.62],
                  [2,  36, 163, 50, 0, 4.43, 19.33,  2.04,  0.29, 89.1, 98.86],
                  [3,  28, 164, 52, 0, 4.81, 16.89,  1.18,  0.14, 93.66, 94.],
@@ -38,7 +38,7 @@ Patient_table = [[1,  40, 163, 54, 0, 4.73, 24.97,  2.97,  0.3, 97.86, 89.62],
 Patient_1 = {
     'Weight': 65.0,      # Weight [kg]
     'V1': 46.0,          # Volume of the central compartment [ml/kg]
-    'V2': 157.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 157.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 5.0,           # Clearance [ml/min/kg]
     't12_alpha': 2.8,    # First half-life time [min]
     't12_beta': 21.7,    # Second half-life time [min]
@@ -48,7 +48,7 @@ Patient_1 = {
 Patient_2 = {
     'Weight': 66.0,      # Weight [kg]
     'V1': 42.0,          # Volume of the central compartment [ml/kg]
-    'V2': 164.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 164.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 4.9,           # Clearance [ml/min/kg]
     't12_alpha': 1.6,    # First half-life time [min]
     't12_beta': 23.1,    # Second half-life time [min]
@@ -58,7 +58,7 @@ Patient_2 = {
 Patient_3 = {
     'Weight': 58.0,      # Weight [kg]
     'V1': 47.0,          # Volume of the central compartment [ml/kg]
-    'V2': 145.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 145.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 6.0,           # Clearance [ml/min/kg]
     't12_alpha': 1.7,    # First half-life time [min]
     't12_beta': 16.9,    # Second half-life time [min]
@@ -68,7 +68,7 @@ Patient_3 = {
 Patient_4 = {
     'Weight': 89.0,      # Weight [kg]
     'V1': 34.0,          # Volume of the central compartment [ml/kg]
-    'V2': 178.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 178.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 5.7,           # Clearance [ml/min/kg]
     't12_alpha': 1.3,    # First half-life time [min]
     't12_beta': 21.7,    # Second half-life time [min]
@@ -78,7 +78,7 @@ Patient_4 = {
 Patient_5 = {
     'Weight': 80.0,      # Weight [kg]
     'V1': 25.0,          # Volume of the central compartment [ml/kg]
-    'V2': 142.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 142.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 4.8,           # Clearance [ml/min/kg]
     't12_alpha': 1.4,    # First half-life time [min]
     't12_beta': 20.4,    # Second half-life time [min]
@@ -88,7 +88,7 @@ Patient_5 = {
 Patient_6 = {
     'Weight': 63.0,      # Weight [kg]
     'V1': 69.0,          # Volume of the central compartment [ml/kg]
-    'V2': 186.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 186.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 6.5,           # Clearance [ml/min/kg]
     't12_alpha': 2.3,    # First half-life time [min]
     't12_beta': 19.8,    # Second half-life time [min]
@@ -98,7 +98,7 @@ Patient_6 = {
 Patient_7 = {
     'Weight': 80.0,      # Weight [kg]
     'V1': 78.0,          # Volume of the central compartment [ml/kg]
-    'V2': 176.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 176.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 6.2,           # Clearance [ml/min/kg]
     't12_alpha': 2.2,    # First half-life time [min]
     't12_beta': 19.8,    # Second half-life time [min]
@@ -108,7 +108,7 @@ Patient_7 = {
 Patient_8 = {
     'Weight': 97.0,      # Weight [kg]
     'V1': 43.0,          # Volume of the central compartment [ml/kg]
-    'V2': 120.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 120.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 4.4,           # Clearance [ml/min/kg]
     't12_alpha': 2.0,    # First half-life time [min]
     't12_beta': 19.0,    # Second half-life time [min]
@@ -118,7 +118,7 @@ Patient_8 = {
 Patient_9 = {
     'Weight': 91.0,      # Weight [kg]
     'V1': 28.0,          # Volume of the central compartment [ml/kg]
-    'V2': 140.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 140.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 5.5,           # Clearance [ml/min/kg]
     't12_alpha': 1.0,    # First half-life time [min]
     't12_beta': 17.8,    # Second half-life time [min]
@@ -128,7 +128,7 @@ Patient_9 = {
 Patient_10 = {
     'Weight': 79.0,      # Weight [kg]
     'V1': 51.0,          # Volume of the central compartment [ml/kg]
-    'V2': 178.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 178.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 5.5,           # Clearance [ml/min/kg]
     't12_alpha': 2.7,    # First half-life time [min]
     't12_beta': 22.4,    # Second half-life time [min]
@@ -138,7 +138,7 @@ Patient_10 = {
 Patient_11 = {
     'Weight': 69.0,      # Weight [kg]
     'V1': 53.0,          # Volume of the central compartment [ml/kg]
-    'V2': 114.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 114.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 4.9,           # Clearance [ml/min/kg]
     't12_alpha': 2.4,    # First half-life time [min]
     't12_beta': 16.1,    # Second half-life time [min]
@@ -148,7 +148,7 @@ Patient_11 = {
 Patient_12 = {
     'Weight': 66.0,      # Weight [kg]
     'V1': 76.0,          # Volume of the central compartment [ml/kg]
-    'V2': 188.0,         # Volume of the peripheral compartment [ml/kg] 
+    'V2': 188.0,         # Volume of the peripheral compartment [ml/kg]
     'Cl': 6.4,           # Clearance [ml/min/kg]
     't12_alpha': 3.3,    # First half-life time [min]
     't12_beta': 20.6,    # Second half-life time [min]
@@ -157,18 +157,19 @@ Patient_12 = {
 }
 # Patient table atracurium Ward et al. 2004 model:
 Patient_table_atracurium = [Patient_1,
-                           Patient_2,
-                           Patient_3,
-                           Patient_4,
-                           Patient_5,
-                           Patient_6,
-                           Patient_7,
-                           Patient_8,
-                           Patient_9,
-                           Patient_10,
-                           Patient_11,
-                           Patient_12]
+                            Patient_2,
+                            Patient_3,
+                            Patient_4,
+                            Patient_5,
+                            Patient_6,
+                            Patient_7,
+                            Patient_8,
+                            Patient_9,
+                            Patient_10,
+                            Patient_11,
+                            Patient_12]
 # ------------------------------------------ #
+
 
 def simu(Patient_info: list, style: str, PID_param: list,
          random_PK: bool = False, random_PD: bool = False) -> tuple[float, list, list]:
@@ -178,7 +179,7 @@ def simu(Patient_info: list, style: str, PID_param: list,
     Parameters
     ----------
     Patient_info : list
-        list of patient informations, Patient_info = [Age, H[cm], W[kg], Gender, Ce50p, Ce50r, γ, β, E0, Emax].
+        list of patient informations, Patient_info = [Age, H[cm], W[kg], sex, Ce50p, Ce50r, γ, β, E0, Emax].
     style : str
         Either 'induction' or 'total' to describe the phase to simulate.
     PID_param : list
@@ -333,7 +334,8 @@ class PID():
             self.integral_part = self.umin / self.Kp - error - self.derivative_part
             control = self.umin
 
-        return control 
+        return control
+
 
 class PID_NMB():
     """PID class to implement PID on python."""
@@ -391,7 +393,8 @@ class PID_NMB():
         else:
             self.sat = False
 
-        return control     
+        return control
+
 
 # ------------------- MAIN ------------------- #
 if __name__ == "__main__":

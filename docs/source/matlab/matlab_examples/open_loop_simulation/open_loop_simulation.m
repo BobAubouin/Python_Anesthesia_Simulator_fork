@@ -34,7 +34,7 @@ sex = 0;                 % 0 = female, 1 = male
 sampling_time = 1;          % seconds
 
 % Creates a patient object with specified parameters
-George = simulator.Patient([age, height, weight, sex],...
+George = patient.Patient([age, height, weight, sex],...
     ts = sampling_time);
 
 %% Simulation setup
