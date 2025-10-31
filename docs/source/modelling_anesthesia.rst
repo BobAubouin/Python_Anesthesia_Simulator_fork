@@ -11,4 +11,5 @@ In the practice of pharmacology, models of drugs effect are usually separated in
    /model/Pharmacodynamics
    /model/Non-linear interactions 
    /model/disturbance_identification
+   /model/Noise_identification
 
