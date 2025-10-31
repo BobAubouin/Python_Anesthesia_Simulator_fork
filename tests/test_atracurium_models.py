@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 # These are not affecting the Ward Weatherley Lago model
 age = 35
 height = 170
-gender = 0
+sex = 0
 
 # Parameters of the Ward Weatherley Lago test model 1
 weight_test_model_default = 75
@@ -41,11 +41,11 @@ pd_parameters_custom = {
 }
 
 # Create Atracurium PK model objects
-test_model_default = AtracuriumModel([age, height, weight_test_model_default, gender])
-test_model_custom = AtracuriumModel([age, height, weight_test_model_default, gender],
+test_model_default = AtracuriumModel([age, height, weight_test_model_default, sex])
+test_model_custom = AtracuriumModel([age, height, weight_test_model_default, sex],
                                     model_params=pk_parameters_custom)
-test_model_default_one_step = AtracuriumModel([age, height, weight_test_model_default, gender])
-test_model_custom_one_step = AtracuriumModel([age, height, weight_test_model_default, gender],
+test_model_default_one_step = AtracuriumModel([age, height, weight_test_model_default, sex])
+test_model_custom_one_step = AtracuriumModel([age, height, weight_test_model_default, sex],
                                              model_params=pk_parameters_custom)
 # Create Atracurium PD model objects
 test_hill_default = NMB_model()
@@ -53,8 +53,8 @@ test_hill_custom = NMB_model(hill_param=pd_parameters_custom)
 # test_hill_custom.plot_surface()
 
 # Create Patient objects that implements the atracurium models
-George_1 = Patient([age, height, weight_test_model_default, gender])
-George_one_step = Patient([age, height, weight_test_model_default, gender])
+George_1 = Patient([age, height, weight_test_model_default, sex])
+George_one_step = Patient([age, height, weight_test_model_default, sex])
 
 # Simulation parameters
 Tsim = 60*100
@@ -148,7 +148,7 @@ recovery_time_george_one_step = time[recovery_idx_george_one_step]
 # These are not affecting the Ward Weatherley Lago model
 age_test_2 = 35
 height_test_2 = 170
-gender_test_2 = 0
+sex_test_2 = 0
 
 # Parameters of the Ward Weatherley Lago test model 1
 weight_test_2 = 75
@@ -172,8 +172,8 @@ pd_parameters_custom_test_2 = {
 }
 
 # Create Atracurium PK model objects
-test_model_default_test_2 = AtracuriumModel([age_test_2, height_test_2, weight_test_2, gender_test_2])
-test_model_custom_test_2 = AtracuriumModel([age_test_2, height_test_2, weight_test_2, gender_test_2],
+test_model_default_test_2 = AtracuriumModel([age_test_2, height_test_2, weight_test_2, sex_test_2])
+test_model_custom_test_2 = AtracuriumModel([age_test_2, height_test_2, weight_test_2, sex_test_2],
                                            model_params=pk_parameters_custom_test_2)
 # Create Atracurium PD model objects
 test_hill_default_test_2 = NMB_model()
@@ -181,7 +181,7 @@ test_hill_custom_test_2 = NMB_model(hill_param=pd_parameters_custom_test_2)
 # test_hill_custom.plot_surface()
 
 # Create Patient objects that implements the atracurium models
-George_test_2 = Patient([age_test_2, height_test_2, weight_test_2, gender_test_2])
+George_test_2 = Patient([age_test_2, height_test_2, weight_test_2, sex_test_2])
 
 # Simulation parameters
 Tsim_test_2 = 60*100

@@ -12,7 +12,7 @@ class TCIController():
     Parameters
     ----------
     patient_info : list
-        Patient information = [age (yr), height (cm), weight (kg), gender( 0= female, 1 = male)].
+        Patient information = [age (yr), height (cm), weight (kg), sex( 0= female, 1 = male)].
     drug_name : str
         Can be either 'Propofol' or 'Remifentanil'.
     model_used : str
@@ -82,10 +82,10 @@ class TCIController():
 
         height = patient_info[1]
         weight = patient_info[2]
-        gender = patient_info[3]
-        if gender == 1:  # homme
+        sex = patient_info[3]
+        if sex == 1:  # homme
             lbm = 1.1 * weight - 128 * (weight / height) ** 2
-        elif gender == 0:  # femme
+        elif sex == 0:  # femme
             lbm = 1.07 * weight - 148 * (weight / height) ** 2
 
         pk_model = CompartmentModel(patient_info, lbm, drug_name, ts=sampling_time, model=model_used)

@@ -3,21 +3,21 @@ from python_anesthesia_simulator import patient
 
 # %% Initialization patient
 ts = 5
-age, height, weight, gender = 74, 164, 88, 1
+age, height, weight, sex = 74, 164, 88, 1
 np.random.seed(42)
 george_nominal = patient.Patient(
-    [age, height, weight, gender],
+    [age, height, weight, sex],
     ts=ts,
 )
 george_random = patient.Patient(
-    [age, height, weight, gender],
+    [age, height, weight, sex],
     ts=ts,
     random_PK=True,
     random_PD=True,
 )
 
 george_truncated = patient.Patient(
-    [age, height, weight, gender],
+    [age, height, weight, sex],
     ts=ts,
     random_PK=True,
     random_PD=True,

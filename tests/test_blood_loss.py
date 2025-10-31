@@ -3,19 +3,19 @@ from python_anesthesia_simulator import Patient, TCIController
 
 # %% Initialization patient
 ts = 5
-age, height, weight, gender = 74, 164, 88, 1
-George = Patient([age, height, weight, gender], ts=ts,
+age, height, weight, sex = 74, 164, 88, 1
+George = Patient([age, height, weight, sex], ts=ts,
                  model_propo="Eleveld", model_remi="Eleveld", co_update=True)
 
 tci_propo = TCIController(
-    [age, height, weight, gender],
+    [age, height, weight, sex],
     drug_name="Propofol",
     drug_concentration=10,
     sampling_time=ts,
     model_used="Eleveld",
 )
 tci_remi = TCIController(
-    [age, height, weight, gender],
+    [age, height, weight, sex],
     drug_name="Remifentanil",
     drug_concentration=10,
     sampling_time=ts,
@@ -42,13 +42,13 @@ for index in range(N_simu):
 
     if index*ts > time_start_bleeding and index*ts < time_end_bleeding:
         Bis, Co, Map, Tol, Nmb = George.one_step(u_propo=uP, u_remi=uR, u_nore=uN,
-                                            blood_rate=- blood_loss_rate, noise=False)
+                                                 blood_rate=- blood_loss_rate, noise=False)
     elif index*ts > time_start_transfusion and index*ts < time_end_transfusion:
         Bis, Co, Map, Tol, Nmb = George.one_step(u_propo=uP, u_remi=uR, u_nore=uN,
-                                            blood_rate=blood_gain_rate, noise=False)
+                                                 blood_rate=blood_gain_rate, noise=False)
     else:
         Bis, Co, Map, Tol, Nmb = George.one_step(u_propo=uP, u_remi=uR, u_nore=uN,
-                                            blood_rate=0, noise=False)
+                                                 blood_rate=0, noise=False)
 
 
 # %% test

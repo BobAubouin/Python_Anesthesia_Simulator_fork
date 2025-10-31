@@ -10,7 +10,7 @@ Tsim = 3600
 # Patient physical data
 weight = 70
 height = 170
-gender = 0
+sex = 0
 
 ts = 1
 
@@ -31,17 +31,17 @@ propofol_infusion_profile[int(150/ts):] = 0.2        # 0.2 mg/s from 150s onward
 # %% Young patient simulation
 age = 20
 bis_delay_1 = 15 + np.exp(0.0517*age)
-George_1 = patient.Patient([age, height, weight, gender],
+George_1 = patient.Patient([age, height, weight, sex],
                            ts=ts,
                            model_propo="Eleveld",
                            model_bis="Eleveld",
                            random_PD=False)
-George_11 = patient.Patient([age, height, weight, gender],
+George_11 = patient.Patient([age, height, weight, sex],
                             ts=ts,
                             model_propo="Eleveld",
                             model_bis="Eleveld",
                             random_PD=False)
-George_111 = patient.Patient([age, height, weight, gender],
+George_111 = patient.Patient([age, height, weight, sex],
                              ts=ts,
                              model_propo="Eleveld",
                              model_bis="Eleveld",
@@ -57,17 +57,17 @@ for k in range(Nsim-1):
 # %% Medium age patient simulation
 age = 60
 bis_delay_2 = 15 + np.exp(0.0517*age)
-George_2 = patient.Patient([age, height, weight, gender],
+George_2 = patient.Patient([age, height, weight, sex],
                            ts=ts,
                            model_propo="Eleveld",
                            model_bis="Eleveld",
                            random_PD=False)
-George_22 = patient.Patient([age, height, weight, gender],
+George_22 = patient.Patient([age, height, weight, sex],
                             ts=ts,
                             model_propo="Eleveld",
                             model_bis="Eleveld",
                             random_PD=False)
-George_222 = patient.Patient([age, height, weight, gender],
+George_222 = patient.Patient([age, height, weight, sex],
                              ts=ts,
                              model_propo="Eleveld",
                              model_bis="Eleveld",
@@ -83,17 +83,17 @@ for k in range(Nsim-1):
 # %% Elderly patient simulation
 age = 80
 bis_delay_3 = 15 + np.exp(0.0517*age)
-George_3 = patient.Patient([age, height, weight, gender],
+George_3 = patient.Patient([age, height, weight, sex],
                            ts=ts,
                            model_propo="Eleveld",
                            model_bis="Eleveld",
                            random_PD=False)
-George_33 = patient.Patient([age, height, weight, gender],
+George_33 = patient.Patient([age, height, weight, sex],
                             ts=ts,
                             model_propo="Eleveld",
                             model_bis="Eleveld",
                             random_PD=False)
-George_333 = patient.Patient([age, height, weight, gender],
+George_333 = patient.Patient([age, height, weight, sex],
                              ts=ts,
                              model_propo="Eleveld",
                              model_bis="Eleveld",

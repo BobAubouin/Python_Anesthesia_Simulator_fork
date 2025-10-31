@@ -5,8 +5,8 @@ from python_anesthesia_simulator import Patient, TCIController
 age = 28
 height = 165
 weight = 65
-gender = 0
-patient_info = [age, height, weight, gender]
+sex = 0
+patient_info = [age, height, weight, sex]
 
 sampling_time = 2
 propofol_target = 4

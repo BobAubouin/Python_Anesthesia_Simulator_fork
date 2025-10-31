@@ -6,17 +6,17 @@ ts = 60
 age = 35
 weight = 70
 height = 170
-gender = 0
+sex = 0
 
 # %%
 
-George_1 = patient.Patient([age, height, weight, gender], ts=ts,
+George_1 = patient.Patient([age, height, weight, sex], ts=ts,
                            model_propo="Schnider", model_remi="Minto", random_PD=False)
-George_2 = patient.Patient([age, height, weight, gender], ts=ts,
+George_2 = patient.Patient([age, height, weight, sex], ts=ts,
                            model_propo="Schnider", model_remi="Minto", random_PD=False)
-George_3 = patient.Patient([age, height, weight, gender], ts=ts,
+George_3 = patient.Patient([age, height, weight, sex], ts=ts,
                            model_propo="Schnider", model_remi="Minto", random_PD=False)
-George_4 = patient.Patient([age, height, weight, gender], ts=ts,
+George_4 = patient.Patient([age, height, weight, sex], ts=ts,
                            model_propo="Schnider", model_remi="Minto", random_PD=False, model_stimuli='VitalDB')
 
 # %% Simulation

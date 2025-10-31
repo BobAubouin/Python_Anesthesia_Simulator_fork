@@ -10,7 +10,7 @@ Tsim = 3600
 age = 35
 weight = 70
 height = 170
-gender = 0
+sex = 0
 
 # %% Baseline simulation
 # Sampling time in seconds
@@ -36,7 +36,7 @@ remifentanil_infusion_profile[int(200/ts):] = 0.1    # 0.1 ug/s from 200s onward
 norepinephrine_infusion_profile[int(1800/ts):] = 0.1    # 0.1 ug/s from 1800s onward
 
 # Patient object
-George_1 = patient.Patient([age, height, weight, gender],
+George_1 = patient.Patient([age, height, weight, sex],
                            ts=ts,
                            model_propo="Schnider",
                            model_remi="Minto",
@@ -71,7 +71,7 @@ remifentanil_infusion_profile[int(200/ts):] = 0.1    # 0.1 ug/s from 200s onward
 norepinephrine_infusion_profile[int(1800/ts):] = 0.1    # 0.1 ug/s from 1800s onward
 
 # Patient object
-George_2 = patient.Patient([age, height, weight, gender],
+George_2 = patient.Patient([age, height, weight, sex],
                            ts=ts,
                            model_propo="Schnider",
                            model_remi="Minto",
@@ -107,7 +107,7 @@ remifentanil_infusion_profile[int(200/ts):] = 0.1    # 0.1 ug/s from 200s onward
 norepinephrine_infusion_profile[int(1800/ts):] = 0.1    # 0.1 ug/s from 1800s onward
 
 # Patient object
-George_3 = patient.Patient([age, height, weight, gender],
+George_3 = patient.Patient([age, height, weight, sex],
                            ts=ts,
                            model_propo="Schnider",
                            model_remi="Minto",

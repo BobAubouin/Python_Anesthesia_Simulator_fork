@@ -10,7 +10,7 @@ Tsim = 3600
 age = 20
 weight = 70
 height = 170
-gender = 0
+sex = 0
 # Sampling time
 ts = 1
 
@@ -50,7 +50,7 @@ bis_delay_1 = 120 * (1 - sqi/100)
 
 # %% Simulation 1: Induction phase
 # Create the patient object
-George_1 = patient.Patient([age, height, weight, gender], ts=ts, random_PD=False)
+George_1 = patient.Patient([age, height, weight, sex], ts=ts, random_PD=False)
 
 # One step simulation
 for k in range(Nsim-1):
@@ -59,9 +59,9 @@ for k in range(Nsim-1):
 
 # %% Simulation 2: Maintenance phase
 # Create the patient objects
-George_2 = patient.Patient([age, height, weight, gender], ts=ts, random_PD=False)
-George_3 = patient.Patient([age, height, weight, gender], ts=ts, random_PD=False)
-George_4 = patient.Patient([age, height, weight, gender], ts=ts, random_PD=False)
+George_2 = patient.Patient([age, height, weight, sex], ts=ts, random_PD=False)
+George_3 = patient.Patient([age, height, weight, sex], ts=ts, random_PD=False)
+George_4 = patient.Patient([age, height, weight, sex], ts=ts, random_PD=False)
 # Set the targets for equilibrium point
 bis_target_1 = 50
 tol_target_1 = 0.9

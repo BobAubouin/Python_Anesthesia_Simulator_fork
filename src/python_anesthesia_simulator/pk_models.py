@@ -33,7 +33,7 @@ class CompartmentModel:
     Parameters
     ----------
     Patient_characteristic: list
-        Patient_characteristic = [age (yr), height(cm), weight(kg), gender(0: female, 1: male)]
+        Patient_characteristic = [age (yr), height(cm), weight(kg), sex(0: female, 1: male)]
     lbm : float
         lean body mass index.
     drug : str
@@ -131,7 +131,7 @@ class CompartmentModel:
         age = Patient_characteristic[0]
         height = Patient_characteristic[1]
         weight = Patient_characteristic[2]
-        gender = Patient_characteristic[3]
+        sex = Patient_characteristic[3]
         self.u_endo = 0  # endogenous production of drug (used for Norepinephrine)
         self.u_lag = 0  # lag in seconds
         self.model = model
@@ -304,7 +304,7 @@ class CompartmentModel:
                 fCLmat_ref = fsig(PMA_ref*52, theta[8], theta[9])
                 fQ3mat = fsig(PMA * 52, theta[14], 1)
                 fQ3mat_ref = fsig(PMA_ref * 52, theta[14], 1)
-                fsal = fal_sallami(gender, weight, age, BMI)
+                fsal = fal_sallami(sex, weight, age, BMI)
                 fsal_ref = fal_sallami(GDR_ref, WGT_ref, AGE_ref, BMI_ref)
 
                 if opiate:
@@ -321,7 +321,7 @@ class CompartmentModel:
                 v2ref = theta[2]
                 v3 = theta[3] * fsal/fsal_ref * fopiate(theta[13])
                 v3ref = theta[3]
-                cl1 = (gender*theta[4] + (1-gender)*theta[15]) * (weight/WGT_ref)**0.75 * \
+                cl1 = (sex*theta[4] + (1-sex)*theta[15]) * (weight/WGT_ref)**0.75 * \
                     fCLmat/fCLmat_ref * fopiate(theta[11])
 
                 cl2 = theta[5]*(v2/v2ref)**0.75 * (1 + theta[16] * (1 - fQ3mat))
@@ -413,7 +413,7 @@ class CompartmentModel:
 
                 BMI = weight/(height/100)**2
 
-                SIZE = (fal_sallami(gender, weight, age, BMI)/fal_sallami(GDR_ref, WGT_ref, AGE_ref, BMI_ref))
+                SIZE = (fal_sallami(sex, weight, age, BMI)/fal_sallami(GDR_ref, WGT_ref, AGE_ref, BMI_ref))
 
                 theta = [None,      # Juste to have the same index as in the paper
                          2.88,
@@ -425,7 +425,7 @@ class CompartmentModel:
 
                 KMAT = fsig(weight, theta[1], 2)
                 KMATref = fsig(WGT_ref, theta[1], 2)
-                if gender:
+                if sex:
                     KSEX = 1
                 else:
                     KSEX = 1+theta[5]*fsig(age, 12, 6)*(1-fsig(age, 45, 6))
@@ -829,7 +829,7 @@ class AtracuriumModel:
     Parameters
     ----------
     Patient_characteristic: list
-        Patient_characteristic = [age (yr), height(cm), weight(kg), gender(0: female, 1: male)]
+        Patient_characteristic = [age (yr), height(cm), weight(kg), sex(0: female, 1: male)]
     model : str, optional
         "WardWeatherleyLago"[Ward1983,Weatherley1983,Lago1998]_.
         The default is "WardWeatherleyLago".    

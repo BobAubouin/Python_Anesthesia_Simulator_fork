@@ -10,14 +10,14 @@ Tsim = 90 * 60
 age = 20
 weight = 70
 height = 170
-gender = 0
+sex = 0
 # Sampling time
 ts = 1
 
 Nsim = int(Tsim / ts)
 
 George = patient.Patient(
-    [age, height, weight, gender],
+    [age, height, weight, sex],
     ts=ts,
     model_propo="Eleveld",
     model_remi="Eleveld",
@@ -26,14 +26,14 @@ George = patient.Patient(
 
 # Initialize tci
 tci_propo = TCIController(
-    [age, height, weight, gender],
+    [age, height, weight, sex],
     drug_name="Propofol",
     drug_concentration=10,
     sampling_time=ts,
     model_used="Eleveld",
 )
 tci_remi = TCIController(
-    [age, height, weight, gender],
+    [age, height, weight, sex],
     drug_name="Remifentanil",
     drug_concentration=50,
     sampling_time=ts,
