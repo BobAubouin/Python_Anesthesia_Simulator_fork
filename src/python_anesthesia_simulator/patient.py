@@ -16,7 +16,7 @@ class Patient:
     Parameters
     ----------
     Patient_characteristic: list
-        Patient_characteristic = [age (yr), height(cm), weight(kg), gender(0: female, 1: male)]
+        Patient_characteristic = [age (yr), height(cm), weight(kg), sex(0: female, 1: male)]
     co_base : float, optional
         Initial cardiac output. The default is 6.5L/min.
     hr_base : float, optional
@@ -73,7 +73,7 @@ class Patient:
         Height of the patient (cm).
     weight : float
         Weight of the patient (kg).
-    gender : bool
+    sex : bool
         0 for female, 1 for male.
     co_base : float
         Initial cardiac output (L/min).
@@ -197,7 +197,7 @@ class Patient:
         self.age = patient_characteristic[0]
         self.height = patient_characteristic[1]
         self.weight = patient_characteristic[2]
-        self.gender = patient_characteristic[3]
+        self.sex = patient_characteristic[3]
         self.co_base = co_base
         self.hr_base = hr_base
         self.map_base = map_base
@@ -217,9 +217,9 @@ class Patient:
         self.bis_delay_max = bis_delay_max
 
         # LBM computation
-        if self.gender == 1:  # homme
+        if self.sex == 1:  # homme
             self.lbm = 1.1 * self.weight - 128 * (self.weight / self.height) ** 2
-        elif self.gender == 0:  # femme
+        elif self.sex == 0:  # femme
             self.lbm = 1.07 * self.weight - 148 * (self.weight / self.height) ** 2
 
         # Init PK models for all drugs
