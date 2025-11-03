@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from python_anesthesia_simulator import patient
+from python_anesthesia_simulator import patient, simulator
 
 
 # Simulation duration in seconds
@@ -114,16 +114,18 @@ George_3 = patient.Patient([age, height, weight, sex],
                            model_nore="Beloeil",
                            random_PD=False)
 
+simulator = simulator.Simulator(George_3)
+
 for k in range(Nsim-1):
 
     uProp_k = propofol_infusion_profile[k]
     uRemi_k = remifentanil_infusion_profile[k]
     uNore_k = norepinephrine_infusion_profile[k]
 
-    George_3.one_step(u_propo=uProp_k,
-                      u_remi=uRemi_k,
-                      u_nore=uNore_k,
-                      noise=False)
+    simulator.one_step(input_propo=uProp_k,
+                       input_remi=uRemi_k,
+                       input_nore=uNore_k,
+                       )
 
 
 # %% Downsample the dataframe for tests
@@ -134,25 +136,41 @@ map_vector = George_1_vectors['MAP']
 co_vector = George_1_vectors['CO']
 tol_vector = George_1_vectors['TOL']
 
+
+# %%
+def test_full_sim_results():
+    """Check that the simulations results are not affected by the sampling time and by the simulation method"""
+    # Check results at low concentrations
+    assert max(abs(bis_vector-df_George_2['BIS'])) < 1e-1
+    assert max(abs(map_vector-df_George_2['MAP'])) < 1
+    assert max(abs(co_vector-df_George_2['CO'])) < 1
+    assert max(abs(tol_vector-df_George_2['TOL'])) < 1e-1
+
+    assert max(abs(bis_vector-simulator.dataframe['BIS'])) < 1e-1
+    assert max(abs(map_vector-simulator.dataframe['MAP'])) < 1
+    assert max(abs(co_vector-simulator.dataframe['CO'])) < 1
+    assert max(abs(tol_vector-simulator.dataframe['TOL'])) < 1e-1
+
+
 # %% plot
 if __name__ == '__main__':
     fig, ax = plt.subplots(5)
 
     ax[0].plot(df_George_1['Time'], df_George_1['BIS'])
     ax[0].plot(df_George_2['Time'], df_George_2['BIS'], '.')
-    ax[0].plot(George_3.dataframe['Time'], George_3.dataframe['BIS'], '*')
+    ax[0].plot(simulator.dataframe['Time'], simulator.dataframe['BIS'], '*')
 
     ax[1].plot(df_George_1['Time'], df_George_1['MAP'])
     ax[1].plot(df_George_2['Time'], df_George_2['MAP'], '.')
-    ax[1].plot(George_3.dataframe['Time'], George_3.dataframe['MAP'], '*')
+    ax[1].plot(simulator.dataframe['Time'], simulator.dataframe['MAP'], '*')
 
     ax[2].plot(df_George_1['Time'], df_George_1['CO'])
     ax[2].plot(df_George_2['Time'], df_George_2['CO'], '.')
-    ax[2].plot(George_3.dataframe['Time'], George_3.dataframe['CO'], '*')
+    ax[2].plot(simulator.dataframe['Time'], simulator.dataframe['CO'], '*')
 
     ax[3].plot(df_George_1['Time'], df_George_1['TOL'])
     ax[3].plot(df_George_2['Time'], df_George_2['TOL'], '.')
-    ax[3].plot(George_3.dataframe['Time'], George_3.dataframe['TOL'], '*')
+    ax[3].plot(simulator.dataframe['Time'], simulator.dataframe['TOL'], '*')
 
     ax[4].plot(df_George_1['Time'], df_George_1['u_propo'])
     ax[4].plot(df_George_1['Time'], df_George_1['u_remi'])
@@ -160,9 +178,9 @@ if __name__ == '__main__':
     ax[4].plot(df_George_2['Time'], df_George_2['u_propo'], '.')
     ax[4].plot(df_George_2['Time'], df_George_2['u_remi'], '.')
     ax[4].plot(df_George_2['Time'], df_George_2['u_nore'], '.')
-    ax[4].plot(George_3.dataframe['Time'], George_3.dataframe['u_propo'], '*')
-    ax[4].plot(George_3.dataframe['Time'], George_3.dataframe['u_remi'], '*')
-    ax[4].plot(George_3.dataframe['Time'], George_3.dataframe['u_nore'], '*')
+    ax[4].plot(simulator.dataframe['Time'], simulator.dataframe['u_propo'], '*')
+    ax[4].plot(simulator.dataframe['Time'], simulator.dataframe['u_remi'], '*')
+    ax[4].plot(simulator.dataframe['Time'], simulator.dataframe['u_nore'], '*')
 
     ax[0].set_ylabel("BIS")
     ax[1].set_ylabel("MAP")
@@ -175,18 +193,5 @@ if __name__ == '__main__':
     plt.ticklabel_format(style='plain')
     plt.show()
 
-# %%
-
-
-def test_full_sim_results():
-    """Check that the simulations results are not affected by the sampling time and by the simulation method"""
-    # Check results at low concentrations
-    assert max(abs(bis_vector-df_George_2['BIS'])) < 1e-1
-    assert max(abs(map_vector-df_George_2['MAP'])) < 1
-    assert max(abs(co_vector-df_George_2['CO'])) < 1
-    assert max(abs(tol_vector-df_George_2['TOL'])) < 1e-1
-
-    assert max(abs(bis_vector-George_3.dataframe['BIS'])) < 1e-1
-    assert max(abs(map_vector-George_3.dataframe['MAP'])) < 1
-    assert max(abs(co_vector-George_3.dataframe['CO'])) < 1
-    assert max(abs(tol_vector-George_3.dataframe['TOL'])) < 1e-1
+    test_full_sim_results()
+    print("Test ok!")

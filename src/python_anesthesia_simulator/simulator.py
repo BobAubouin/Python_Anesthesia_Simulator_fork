@@ -4,9 +4,11 @@ import numpy as np
 import pandas as pd
 import casadi as cas
 from scipy.signal import dlsim, TransferFunction
+# Local immports
 from .patient import Patient
 from .tci_control import TCIController
 from .disturbances import compute_disturbances
+from .alarms import standard_alarm
 
 
 class Simulator:
@@ -18,9 +20,10 @@ class Simulator:
                  tci_remi: Optional[str] = None,
                  #  tci_nore_: Optional[bool] = False,  not yet available
                  #  tci_atracurium: Optional[bool] = False, not yet available
-                 disturbance_profil: Optional[str] = None,
+                 disturbance_profil: Optional[str] = 'null',
                  noise: bool = False,
-                 save_data: bool = True,
+                 bis_delay_max: float = 120,
+                 save_signals: bool = True,
                  ):
         """Initialize the Simulator with a patient, and eventual TCI pumps.
 
@@ -36,22 +39,31 @@ class Simulator:
             Type of disturbance profile to apply. See disturbance module for more details. The default is None.
         noise: bool, optional
             If True, add noise to the outputs of the patient model. The default is False.
+        bis_delay_max : float, optional
+            Maximum value of the BIS delay caused by Signal Quality Index (SQI) expressed in (s) according to the relationship proposed in [Wahlquist2025]_. The default is 120 (s).
         save_data: bool, optional
             If True, save the simulation data in a dataframe. The default is False.
+
+        References
+        ---------- 
+        .. [Wahlquist2025] Y. Wahlquist, et al. "Kalman filter soft sensor to handle signal quality
+            loss in closed-loop controlled anesthesia" Biomedical Signal Processing and Control 104 (2025): 107506.
+            doi: https://doi.org/10.1016/j.bspc.2025.107506  
         """
         self.patient = patient
         self.ts = patient.ts
         self.time = 0
         self.disturbance_profil = disturbance_profil
         self.noise = noise
-        self.save_data = save_data
+        self.bis_delay_max = bis_delay_max
+        self.save_signals = save_signals
         self.demographic = [
             patient.age,
             patient.weight,
             patient.height,
             patient.sex
         ]
-        if tci_propo != 'none':
+        if tci_propo is not None:
             if tci_propo not in ['Plasma', 'Effect_site']:
                 raise ValueError('tci_propo must be either "Plasma", "Effect_site" or "none"')
             self.tci_propo = TCIController(
@@ -62,7 +74,7 @@ class Simulator:
             )
         else:
             self.tci_propo = None
-        if tci_remi != 'none':
+        if tci_remi is not None:
             if tci_remi not in ['Plasma', 'Effect_site']:
                 raise ValueError('tci_remi must be either "Plasma", "Effect_site" or "none"')
             self.tci_remi = TCIController(
@@ -75,7 +87,7 @@ class Simulator:
             self.tci_remi = None
 
         # Initialize the buffer to simulate BIS delay
-        self.bis_delay_buffer = np.ones(int(np.ceil(self.bis_delay_max / self.ts))) * self.bis
+        self.bis_delay_buffer = np.ones(int(np.ceil(self.bis_delay_max / self.ts))) * self.patient.bis
 
         # init noise model
         self.map_noise_std = 30
@@ -112,7 +124,7 @@ class Simulator:
         self.noise_index = 0
 
         # Save data
-        if self.save_data:
+        if self.save_signals:
             self.init_dataframe()
             self.save_data()
 
@@ -122,6 +134,7 @@ class Simulator:
                  input_nore: float = 0,
                  input_atracurium: float = 0,
                  sqi: float = 100,
+                 blood_rate: float = 0,
                  ) -> tuple[float, float, float, float]:
         r"""Simulate one step of the patient model with given inputs.
 
@@ -163,7 +176,8 @@ class Simulator:
             u_remi=infusion_remi,
             u_nore=input_nore,
             u_atra=input_atracurium,
-            disturbances=disturbances,
+            blood_rate=blood_rate,
+            dist=disturbances,
         )
 
         # add noise
@@ -174,17 +188,16 @@ class Simulator:
         delay = self.bis_delay_max * (1 - sqi / 100)
         delay_steps = int(np.ceil(delay / self.ts)) - 1
         if delay_steps > 0:
-
             # Approximated by excess
             self.bis_delay_buffer = np.roll(self.bis_delay_buffer, -1)
             self.bis_delay_buffer[delay_steps:] = [self.bis] * len(self.bis_delay_buffer[delay_steps:])
             self.bis = self.bis_delay_buffer[0]
         else:
-            self.bis_delay_buffer = np.ones(int(np.ceil(self.bis_delay_max / self.ts))) * self.bis
+            self.bis_delay_buffer = np.ones(int(np.ceil(self.bis_delay_max / self.ts))) * self.patient.bis
 
         self.time += self.ts
 
-        if self.save_data:
+        if self.save_signals:
             self.save_data(
                 inputs=[
                     infusion_propo,
@@ -253,16 +266,16 @@ class Simulator:
             - 'target_remi': Target concentration for Remifentanil (ng/ml)
 
         """
-        self.Time = 0
+        self.time = 0
         column_names = ['Time',  # time
                         'BIS', 'SQI', 'TOL', 'NMB', 'MAP', 'CO',  # outputs
                         'TPR', 'SV', 'HR', 'SAP', 'DAP',  # outputs
                         'u_propo', 'u_remi', 'u_nore', 'u_atra',  # inputs
                         'blood_volume']  # nore concentration and blood volume
-        propo_state_names = [f'x_propo_{i + 1}' for i in range(len(self.propo_pk.x))]
-        remi_state_names = [f'x_remi_{i + 1}' for i in range(len(self.remi_pk.x))]
-        nore_state_names = [f'x_nore_{i + 1}' for i in range(len(self.nore_pk.x))]
-        atra_state_names = [f'x_atra_{i + 1}' for i in range(len(self.atracurium_pk.x))]
+        propo_state_names = [f'x_propo_{i + 1}' for i in range(len(self.patient.propo_pk.x))]
+        remi_state_names = [f'x_remi_{i + 1}' for i in range(len(self.patient.remi_pk.x))]
+        nore_state_names = [f'x_nore_{i + 1}' for i in range(len(self.patient.nore_pk.x))]
+        atra_state_names = [f'x_atra_{i + 1}' for i in range(len(self.patient.atracurium_pk.x))]
         column_names += propo_state_names + remi_state_names + nore_state_names + atra_state_names
         if self.tci_propo is not None:
             column_names.append('target_propo')
@@ -289,12 +302,13 @@ class Simulator:
                     'u_nore': inputs[2],
                     'u_atra': inputs[3],
                     'SQI': inputs[4],
-                    'blood_volume': self.blood_volume}  # blood volume
+                    'blood_volume': self.patient.blood_volume}  # blood volume
 
-        line_x_propo = {f'x_propo_{i + 1}': self.propo_pk.x[i, 0] for i in range(len(self.propo_pk.x))}
-        line_x_remi = {f'x_remi_{i + 1}': self.remi_pk.x[i, 0] for i in range(len(self.remi_pk.x))}
-        line_x_nore = {f'x_nore_{i + 1}': self.nore_pk.x[i, 0] for i in range(len(self.nore_pk.x))}
-        line_x_atra = {f'x_atra_{i + 1}': self.atracurium_pk.x[i, 0] for i in range(len(self.atracurium_pk.x))}
+        line_x_propo = {f'x_propo_{i + 1}': self.patient.propo_pk.x[i, 0] for i in range(len(self.patient.propo_pk.x))}
+        line_x_remi = {f'x_remi_{i + 1}': self.patient.remi_pk.x[i, 0] for i in range(len(self.patient.remi_pk.x))}
+        line_x_nore = {f'x_nore_{i + 1}': self.patient.nore_pk.x[i, 0] for i in range(len(self.patient.nore_pk.x))}
+        line_x_atra = {f'x_atra_{i + 1}': self.patient.atracurium_pk.x[i, 0]
+                       for i in range(len(self.patient.atracurium_pk.x))}
         new_line.update(line_x_propo)
         new_line.update(line_x_remi)
         new_line.update(line_x_nore)
@@ -363,3 +377,8 @@ class Simulator:
             *patient_arg,
         )
         return self.patient
+
+    def compute_alarms(self):
+        """Compute standard alarm from saved data.
+        """
+        return standard_alarm(self.dataframe)

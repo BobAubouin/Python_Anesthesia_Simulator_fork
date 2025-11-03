@@ -4,7 +4,6 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 import casadi as cas
-from scipy.signal import dlsim, TransferFunction
 # Local imports
 from .pk_models import CompartmentModel, AtracuriumModel
 from .pd_models import BIS_model, TOL_model, Hemo_meca_PD_model, NMB_model
@@ -58,10 +57,6 @@ class Patient:
         Add uncertainties in the BIS PD model. The default is False.
     co_update : bool, optional
         Turn on the option to update PK parameters thanks to the CO value. The default is False.
-    save_data_bool : bool, optional
-        Save all interns variable at each sampling time in a data frame. The default is True.
-    bis_delay_max : float, optional
-        Maximum value of the BIS delay caused by Signal Quality Index (SQI) expressed in (s) according to the relationship proposed in [Wahlquist2025]_. The default is 120 (s).
     truncated : bool, optional
         Use truncated normal distribution (between [-3, +3] std) for the random parameters. The default is False.    
 
@@ -111,8 +106,6 @@ class Patient:
         Add uncertainties in the BIS PD model.
     co_update : bool
         Turn on the option to update PK parameters thanks to the CO value.
-    save_data_bool : bool
-        Save all internal variables at each sampling time in a data frame.
     lbm : float
         Lean body mass (kg).
     propo_pk : CompartmentModel
@@ -155,12 +148,6 @@ class Patient:
         Maximum value of the BIS delay caused by signal quality index expressed in (s). 
     bis_delay_buffer: array
         Buffer of BIS values to simulate delay.
-
-    References
-    ---------- 
-    .. [Wahlquist2025] Y. Wahlquist, et al. "Kalman filter soft sensor to handle signal quality loss in closed-loop controlled anesthesia" 
-              Biomedical Signal Processing and Control 104 (2025): 107506.
-              doi: https://doi.org/10.1016/j.bspc.2025.107506  
     """
 
     def __init__(self,
@@ -182,8 +169,6 @@ class Patient:
                  random_PK: bool = False,
                  random_PD: bool = False,
                  co_update: bool = False,
-                 save_data_bool: bool = True,
-                 bis_delay_max: float = 120,
                  truncated: bool = False):
         """
         Initialise a patient class for anesthesia simulation.
@@ -213,8 +198,6 @@ class Patient:
         self.random_PK = random_PK
         self.random_PD = random_PD
         self.co_update = co_update
-        self.save_data_bool = save_data_bool
-        self.bis_delay_max = bis_delay_max
 
         # LBM computation
         if self.sex == 1:  # homme
@@ -278,6 +261,8 @@ class Patient:
         self.hr = self.hemo_pd.abase_hr
         self.co = self.hr*self.sv / 1000
         self.map = self.tpr*self.hr*self.sv
+        self.dap = self.map - 2 / 9 * self.sv
+        self.sap = self.map + 4 / 9 * self.sv
 
     def one_step(self, u_propo: float = 0, u_remi: float = 0, u_nore: float = 0, u_atra: float = 0, sqi: float = 100,
                  blood_rate: float = 0, dist: list = [0] * 3) -> tuple[float, float, float, float]:
@@ -357,18 +342,6 @@ class Patient:
 
         self.dap = self.map - 2 / 9 * self.sv
         self.sap = self.map + 4 / 9 * self.sv
-
-        # Save data
-        if self.save_data_bool:
-            index = int(self.Time / self.ts)
-            self.dataframe.loc[index, 'u_propo'] = u_propo
-            self.dataframe.loc[index, 'u_remi'] = u_remi
-            self.dataframe.loc[index, 'u_nore'] = u_nore
-            self.dataframe.loc[index, 'u_atra'] = u_atra
-            self.dataframe.loc[index, 'SQI'] = sqi
-            # compute time
-            self.Time += self.ts
-            self.save_data()
 
         return (self.bis, self.co, self.map, self.tol, self.nmb)
 
@@ -585,22 +558,21 @@ class Patient:
             self.c_blood_remi_eq,
             self.c_blood_nore_eq)
 
-        if self.save_data_bool:
-            self.init_dataframe()
-            # recompute output variable
-            # BIS
-            self.bis = self.bis_pd.compute_bis(self.propo_pk.x[3, 0], self.remi_pk.x[3, 0])
-            # TOL
-            self.tol = self.tol_pd.compute_tol(self.propo_pk.x[3, 0], self.remi_pk.x[3, 0])
-            # Hemodynamic
-            y_hemo = self.hemo_pd.one_step(self.propo_pk.x[0, 0], self.remi_pk.x[0, 0], self.nore_pk.x[0, 0])
-            self.tpr = y_hemo[0]
-            self.sv = y_hemo[1]
-            self.hr = y_hemo[2]
-            self.map = y_hemo[3]
-            self.co = y_hemo[4]
-
-            self.save_data()
+        # Init all the output variable
+        # BIS
+        self.bis = self.bis_pd.compute_bis(self.propo_pk.x[3, 0], self.remi_pk.x[3, 0])
+        # TOL
+        self.tol = self.tol_pd.compute_tol(self.propo_pk.x[3, 0], self.remi_pk.x[3, 0])
+        # Hemodynamic
+        y_hemo = self.hemo_pd.one_step(self.propo_pk.x[0, 0], self.remi_pk.x[0, 0], self.nore_pk.x[0, 0])
+        self.nmb = self.nmb_pd.compute_nmb(0)
+        self.tpr = y_hemo[0]
+        self.sv = y_hemo[1]
+        self.hr = y_hemo[2]
+        self.map = y_hemo[3]
+        self.co = y_hemo[4]
+        self.dap = self.map - 2 / 9 * self.sv
+        self.sap = self.map + 4 / 9 * self.sv
 
     def initialized_at_maintenance(self, bis_target: float, tol_target: float,
                                    map_target: float) -> tuple[float, float, float]:
@@ -740,9 +712,6 @@ class Patient:
         # INPUT consistency check
         if not (len(u_propo) == len(u_remi) and len(u_propo) == len(u_nore) == len(u_atra)):
             raise ValueError('Inputs must have the same length')
-
-        # init the dataframe
-        self.init_dataframe()
 
         # simulate
         x_propo = self.propo_pk.full_sim(u_propo, x0_propo, interp)
